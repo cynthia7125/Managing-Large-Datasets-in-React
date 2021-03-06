@@ -50,8 +50,7 @@ const Event = ({ data }) => {
 export default class Catalog extends Component {
 	state = {
 		eventData: generateEventData(5),
-		priceFilter: -1,
-		tmp: 0,
+		artistFilter: "",
 	}
 
 	constructor(props) {
@@ -68,18 +67,21 @@ export default class Catalog extends Component {
 		})
 	}
 
-	setPriceFilter() {
-		this.setState({ priceFilter: this.filterInput.current.value || -1 })
+	setFilter() {
+		this.setState({ artistFilter: this.filterInput.current.value })
 	}
 
 	render() {
 		var filteredEvents
 
-		if (this.state.priceFilter < 0) {
+		if (!this.state.artistFilter) {
 			filteredEvents = this.state.eventData
 		} else {
 			filteredEvents = this.state.eventData.filter(
-				(ed) => ed.price <= this.state.priceFilter
+				(ed) =>
+					ed.artist
+						.toLowerCase()
+						.indexOf(this.state.artistFilter.toLowerCase()) >= 0
 			)
 		}
 
@@ -91,20 +93,17 @@ export default class Catalog extends Component {
 					</h1>
 					<div class="header-cart">
 						<img src={cartImg} />
-						<p>
-							<span>
-								{this.state.totalTickets} {this.state.tmp}
-							</span>{" "}
-							tickets
-						</p>
 					</div>
 				</header>
 				<section>
 					<div class="search-bar">
-						<button onClick={this.setPriceFilter.bind(this)}>
-							Filter with max price:
+						<button onClick={this.setFilter.bind(this)}>
+							Filter :
 						</button>
-						<input ref={this.filterInput}></input>
+						<input
+							onChange={this.setFilter.bind(this)}
+							ref={this.filterInput}
+						></input>
 					</div>
 					<div class="table">
 						<table>
@@ -126,7 +125,10 @@ export default class Catalog extends Component {
 							</tbody>
 						</table>
 					</div>
-					<input ref={this.generatorNumberInput}></input>
+					<input
+						type="number"
+						ref={this.generatorNumberInput}
+					></input>
 					<button onClick={this.generateEvents.bind(this)}>
 						Add
 					</button>
