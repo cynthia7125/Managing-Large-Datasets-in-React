@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import faker from "faker"
 
+import { Pagination, PageNavigation } from "./pagination"
+
 import "./normalize.css"
 import "./Catalog.css"
 
@@ -19,7 +21,7 @@ const generateEventData = (n) => {
 		data.push({
 			name: faker.lorem.words(2),
 			thumbNail: i % thumbNails.length,
-			dateTime: faker.date.future().toString(),
+			dateTime: faker.date.future().toDateString(),
 			artist: faker.name.findName(),
 			price: faker.random.number(100) + 20,
 			tickets: faker.random.number(100) + 40,
@@ -33,7 +35,7 @@ const Event = ({ data }) => {
 	return (
 		<tr>
 			<td class="event-image">
-				<img src={thumbNails[thumbNail]} />
+				<img alt="thumbnail" src={thumbNails[thumbNail]} />
 			</td>
 			<td class="event-date">{dateTime}</td>
 			<td class="event-name">{name}</td>
@@ -50,6 +52,7 @@ const Event = ({ data }) => {
 export default class Catalog extends Component {
 	state = {
 		eventData: generateEventData(5),
+		currentPage: 0,
 		artistFilter: "",
 	}
 
@@ -64,11 +67,23 @@ export default class Catalog extends Component {
 			eventData: generateEventData(
 				parseInt(this.generatorNumberInput.current.value)
 			),
+			currentPage: 0,
 		})
 	}
 
 	setFilter() {
-		this.setState({ artistFilter: this.filterInput.current.value })
+		this.setState({
+			artistFilter: this.filterInput.current.value,
+			currentPage: 0,
+		})
+	}
+
+	previousPage() {
+		this.setState({ currentPage: this.state.currentPage - 1 })
+	}
+
+	nextPage() {
+		this.setState({ currentPage: this.state.currentPage + 1 })
 	}
 
 	render() {
@@ -85,14 +100,16 @@ export default class Catalog extends Component {
 			)
 		}
 
+		const filteredPages = new Pagination(filteredEvents, 5)
+
 		return (
 			<div class="container">
 				<header>
 					<h1>
-						<img src={whiteLogo} />
+						<img alt="logo" src={whiteLogo} />
 					</h1>
 					<div class="header-cart">
-						<img src={cartImg} />
+						<img alt="cart" src={cartImg} />
 					</div>
 				</header>
 				<section>
@@ -119,11 +136,20 @@ export default class Catalog extends Component {
 								</tr>
 							</thead>
 							<tbody>
-								{filteredEvents.map((ed, i) => (
-									<Event data={ed} key={i} />
-								))}
+								{filteredPages
+									.getPage(this.state.currentPage)
+									.map((ed, i) => (
+										<Event data={ed} key={i} />
+									))}
 							</tbody>
 						</table>
+
+						<PageNavigation
+							nextPageHandler={this.nextPage.bind(this)}
+							previousPageHandler={this.previousPage.bind(this)}
+							currentPage={this.state.currentPage}
+							totalPages={filteredPages.getTotalPages()}
+						></PageNavigation>
 					</div>
 					<input
 						type="number"
