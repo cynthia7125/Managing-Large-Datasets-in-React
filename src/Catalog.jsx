@@ -57,10 +57,34 @@ export default class Catalog extends Component {
 	}
 
 	constructor(props) {
-		super(props)
-		this.generatorNumberInput = React.createRef()
-		this.filterInput = React.createRef()
-	}
+    super(props);
+    this.generatorNumberInput = React.createRef();
+    this.filterInput = React.createRef();
+    // infinite scrolling code
+    // this.bottomDetector = React.createRef()
+  }
+// infinite scrolling code
+	// componentDidMount() {
+	// 	var options = {
+	// 		threshold: 1.0,
+	// 	}
+
+	// 	const observer = new IntersectionObserver(
+	// 		this.nextPage.bild(this),
+	// 		options
+	// 	)
+	// 	observer.observe(this.bottomDetector.current)
+	// }
+
+	// componentDidUpdate() {
+	// 	const viewbox = this.bottomDetector.current.getBoundingClientRect()
+	// 	if (
+	// 		viewbox.top < window.innerHeight &&
+	// 		this.state.currentPage < this.totalPages
+	// 	) {
+	// 		this.nextPage()
+	// 	}
+	// }
 
 	generateEvents() {
 		this.setState({
@@ -87,79 +111,77 @@ export default class Catalog extends Component {
 	}
 
 	render() {
-		var filteredEvents
+    var filteredEvents;
 
-		if (!this.state.artistFilter) {
-			filteredEvents = this.state.eventData
-		} else {
-			filteredEvents = this.state.eventData.filter(
-				(ed) =>
-					ed.artist
-						.toLowerCase()
-						.indexOf(this.state.artistFilter.toLowerCase()) >= 0
-			)
-		}
+    if (!this.state.artistFilter) {
+      filteredEvents = this.state.eventData;
+    } else {
+      filteredEvents = this.state.eventData.filter(
+        (ed) =>
+          ed.artist
+            .toLowerCase()
+            .indexOf(this.state.artistFilter.toLowerCase()) >= 0
+      );
+    }
 
-		const filteredPages = new Pagination(filteredEvents, 5)
+    const filteredPages = new Pagination(filteredEvents, 5);
+    // infinite scrolling code
+    // this.totalPages = filteredPages.getTotalPages()
 
-		return (
-			<div class="container">
-				<header>
-					<h1>
-						<img alt="logo" src={whiteLogo} />
-					</h1>
-					<div class="header-cart">
-						<img alt="cart" src={cartImg} />
-					</div>
-				</header>
-				<section>
-					<div class="search-bar">
-						<button onClick={this.setFilter.bind(this)}>
-							Filter :
-						</button>
-						<input
-							onChange={this.setFilter.bind(this)}
-							ref={this.filterInput}
-						></input>
-					</div>
-					<div class="table">
-						<table>
-							<thead>
-								<tr>
-									<th scope="col">&nbsp;</th>
-									<th scope="col">Date</th>
-									<th scope="col">Name</th>
-									<th scope="col">Artist</th>
-									<th scope="col">Price</th>
-									<th scope="col">Tickets Left</th>
-									<th scope="col">&nbsp;</th>
-								</tr>
-							</thead>
-							<tbody>
-								{filteredPages
-									.getPage(this.state.currentPage)
-									.map((ed, i) => (
-										<Event data={ed} key={i} />
-									))}
-							</tbody>
-						</table>
+    return (
+      <div class="container">
+        <header>
+          <h1>
+            <img alt="logo" src={whiteLogo} />
+          </h1>
+          <div class="header-cart">
+            <img alt="cart" src={cartImg} />
+          </div>
+        </header>
+        <section>
+          <div class="search-bar">
+            <button onClick={this.setFilter.bind(this)}>Filter :</button>
+            <input
+              onChange={this.setFilter.bind(this)}
+              ref={this.filterInput}
+            ></input>
+          </div>
+          <div class="table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">&nbsp;</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Artist</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Tickets Left</th>
+                  <th scope="col">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPages
+                  // infinite scrolling code
+                  //   .getUptoPage(this.state.currentPage)
+                  .getPage(this.state.currentPage)
+                  .map((ed, i) => (
+                    <Event data={ed} key={i} />
+                  ))}
+              </tbody>
+            </table>
+            <div ref={this.bottomDetector}></div>
 
-						<PageNavigation
-							nextPageHandler={this.nextPage.bind(this)}
-							previousPageHandler={this.previousPage.bind(this)}
-							currentPage={this.state.currentPage}
-							totalPages={filteredPages.getTotalPages()}
-						></PageNavigation>
-					</div>
-					<input
-						type="number"
-						ref={this.generatorNumberInput}
-					></input>
-					<button onClick={this.generateEvents.bind(this)}>
-						Add
-					</button>
-				</section>
-			</div>
-		)
-	}
+            <PageNavigation
+              nextPageHandler={this.nextPage.bind(this)}
+              previousPageHandler={this.previousPage.bind(this)}
+              currentPage={this.state.currentPage}
+              totalPages={filteredPages.getTotalPages()}
+            ></PageNavigation>
+          </div>
+          <input type="number" ref={this.generatorNumberInput}></input>
+          <button onClick={this.generateEvents.bind(this)}>Add</button>
+        </section>
+      </div>
+    );
+  }
 }
